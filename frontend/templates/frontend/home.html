@@ -1,0 +1,237 @@
+{% extends 'frontend/base.html'%}
+{%load static %}
+{% block searchbar %}
+    <form class="d-flex ms-auto" method="post">
+    {% csrf_token %}
+    <div class="col-md-12">
+        <input style="width:400px; border-color: black; box-shadow: none;" class="form-control me-2 ms-auto" type="search" id="btnsearchinput" placeholder="Search" >
+    </div>
+    <input style="margin-left:10px" class="btn btn-outline-warning" type="button" id="btnsearch" value="search">
+    </form>
+{% endblock searchbar %}
+{% block css %}
+    <style>
+        .my-font{
+            font-family:Roboto, Helvetica,Arial,sans-serif; 
+            font-weight:600;
+        }
+        .my-color{
+            color:#5799ef;
+        }
+        .my-div{
+            gap:10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+    <div class="row row-cols-1 row-cols-md-1 g-4;" style="padding:3em;" id="searchResult">
+       
+    </div>
+
+    <div class="modal fade" style="color:black;" id="aplform" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Add video to...</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post">
+            {% csrf_token %}
+              <div class="modal-body" id="playlistresult">
+                  
+                
+                
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnadpl" class="btn btn-primary" >Add</button>
+              </div>
+            </form>
+          </div>
+        </div>
+    </div>
+      
+    {% endblock %}
+    
+{% block js %}
+    <script>
+        $("#btnsearch").click(
+            ()=>{
+                const searchValue = $("#btnsearchinput").val();
+                var url = `http://www.omdbapi.com/?apikey=aef7af3b&s=${searchValue}`
+
+                fetch(url)
+                .then(resp => resp.json())
+                .then(data => {
+                    var list =data.Search
+                    $('#searchResult').empty()
+                    
+                    for(i in list)
+                    {
+                        var url2 = `http://www.omdbapi.com/?apikey=aef7af3b&i=${list[i].imdbID}`
+                        fetch(url2)
+                        .then(resp=>resp.json())
+                        .then(data=>{
+                           
+                            if(data.Poster == "N/A")
+                                var img=`<img src="{% static 'images/6.jpg' %}" class="card-img-top" alt="..." style="height:100%; width:100%; object-fit:cover;">`
+                            else
+                                var img =`<img src=${data.Poster} class="card-img-top" alt="..." style="height:100%; width:100%; object-fit:cover;">`
+                            
+                            var boxoffice=``
+                            if( data.BoxOffice != undefined)
+                            {
+                                boxoffice=`<div class="d-flex border-top border-light border-1 my-div">
+                                    <span class="my-font">BoxOffice</span>
+                                    <span class="my-color">${data.BoxOffice}</span>
+                                </div>`
+                            }
+                            var production=``
+                            if(data.Production != undefined)
+                            {
+                                production = `<div class="d-flex border-top border-light border-1 my-div">
+                                    <span class="my-font">Production</span>
+                                    <span class="my-color">${data.Production}</span>
+                                </div>`
+                            }
+                            var item = `
+                            <div class="row shadow " style="padding-bottom:30px">
+                                <div class="col-md-4" style="text-align:center;">
+                                    ${img}
+                                </div>
+
+                                <div class="col-md-8"  style="background-color: rgb(26,26,26);">
+                                    <div class="card-body">
+                                        
+                                        <div class="d-flex" style="justify-content: space-between;">
+                                            <div class="d-flex flex-column">
+                                                <h5 class="card-title" style="font-size:40px;">${data.Title}</h5>
+                                                <div class="d-flex" style="font-size:13px; gap:5px;">
+                                                    <span style="color:darkgrey;">${data.Genre}</span>
+                                                    <span style="color:darkgrey;">${data.Released}</span>
+                                                    <span style="color:darkgrey;">${data.Rated}</span>
+                                                    <span style="color:darkgrey;">${data.Runtime}</span>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="d-flex" style="gap:5px;">
+                                                <a  id="btndisplaypl" onClick="displayPlaylist(this);" style="border:none; color:white; align-self:center;" class="btn btn-outline-dark" href="#" data-bs-toggle="modal" data-bs-target="#aplform" role="button" data-imdbid="${data.imdbID}" ><i class="bi bi-bookmark-plus-fill" style="font-size:36px; align-self:center;"></i>
+                                                </a>
+                                                <div class="d-flex flex-column">
+                                                    <span style="color:darkgrey; font-size:12px; font-weight:700; ">IMDB RATING</span>
+                                                    <div class="d-flex">
+                                                        <i class="bi bi-star-fill" style="color:#f5c518; align-self:center; font-size:27px; padding:6px;"></i>
+                                                        <div class="d-flex flex-column">
+                                                            <span style="margin-left: 5px; color:white; font-size:22px;">${data.imdbRating}</span>
+                                                            <span style="font-size:13px; color:darkgrey;">${data.imdbVotes}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        
+                                        <div class="d-flex flex-column" style="margin-top:30px;">
+                                            
+                                            <span style="margin-bottom:10px;">${data.Plot}</span>
+                                            <div class="d-flex border-top border-light border-1 my-div" style="">
+                                                <span class="my-font" style="">Directors</span>
+                                                <span class="my-color" style="">${data.Director}</span>
+                                            </div>
+                                            <div class="d-flex border-top border-light border-1 my-div">
+                                                <span class="my-font">Writers</span>
+                                                <span class="my-color">${data.Writer}</span>
+                                            </div>
+                                            <div class="d-flex border-top border-light border-1 my-div">
+                                                <span class="my-font">Stars</span>
+                                                <span class="my-color">${data.Actors}</span>
+                                            </div>
+                                            <div class="d-flex border-top border-light border-1 my-div">
+                                                <span class="my-font">Language</span>
+                                                <span class="my-color">${data.Language}</span>
+                                            </div>
+                                            <div class="d-flex border-top border-light border-1 my-div">
+                                                <span class="my-font">Country</span>
+                                                <span class="my-color">${data.Country}</span>
+                                            </div>
+                                            <div class="d-flex border-top border-light border-1 my-div">
+                                                <span class="my-font">Awards</span>
+                                                <span class="my-color">${data.Awards}</span>
+                                            </div>
+                                            ${boxoffice}
+                                            ${production}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            `
+                            $('#searchResult').append(item);
+                        }) 
+                    }
+
+                })
+            }
+        )
+        function displayPlaylist(obj)
+        {
+           
+            var recipient = obj.getAttribute('data-imdbid')
+            var input_field = `<input data-id-imdbid="${recipient}" type="hidden" name="flexRadioDefault" id="hiddenimdbid" readonly>`
+            
+
+            var url = `/api/v1/movie/create_playlist/`
+
+            fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                $('#playlistresult').empty()
+                $('#playlistresult').append(input_field)
+                for(i in data)
+                {
+                    var item=`
+                    <div class="mb-3">
+                        <input class="form-check-input" type="radio" name="plist" id="flexRadioDefault1" data-playlistid="${data[i].id}">
+                        <label class="form-check-label" for="flexRadioDefault1">
+                            ${data[i].name}
+                        </label>
+                    </div>
+                    `
+                    $('#playlistresult').append(item);
+                }
+               
+            })  
+        }
+        
+        $("#btnadpl").click(
+            ()=>{
+
+                var pid = $("input[name='plist']:checked").attr("data-playlistid");
+                var myData = {
+                    playlist_id: pid,
+                    imdb_id: $('#hiddenimdbid').attr("data-id-imdbid"),
+                };
+
+               
+                const url = `/api/v1/movie/add_to_playlist/${pid}/`;
+                const data = {
+                    method: "post",
+                    credentials: "same-origin",
+                    headers: {
+                        "X-CSRFToken": $("input[name=csrfmiddlewaretoken]").val(),
+                        "Accept": "application/json",
+                        "Content-Type": "application/json"
+                        },
+                    body: JSON.stringify(myData)
+                }
+                fetch(url, data).then(function(response) {
+                    $('#aplform').modal('toggle');
+                })
+            })
+        
+      </script>
+    
+{% endblock %}
+

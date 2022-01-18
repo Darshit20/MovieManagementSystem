@@ -1,0 +1,173 @@
+{% extends 'frontend/base.html'%}
+{%load static %}
+{% block css %}
+    <style>
+        .my-font{
+            font-family:Roboto, Helvetica,Arial,sans-serif; 
+            font-weight:600;
+        }
+        .my-color{
+            color:#5799ef;
+        }
+        .my-div{
+            gap:10px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+        }
+    </style>
+{% endblock %}
+{% block content %}
+   
+    <div class="row row-cols-1 row-cols-md-1 g-4;" style="padding:2em; margin-top:10px;" >
+        <div class="row shadow">
+            <h1 id="watchlisttitle" style="background-color:rgb(18,18,18); padding:10px;">
+
+            </h1>
+        </div>
+    </div>
+    <div class="row row-cols-1 row-cols-md-1 g-4;" style="padding:3em;" id="watchlistresult">
+       
+    </div>
+{% endblock %}
+    
+{% block js %}
+    <script>
+        const params = new URLSearchParams(window.location.search)
+        $(document).ready(function(){
+            var url=`api/v1/movie/get_user_playlist/${params.get('id')}`
+           
+            fetch(url)
+            .then(resp => resp.json())
+            .then(data => {
+                
+                
+                if(Object.keys(data).length === 0)
+                {
+                    window.location.href = '/signin'
+                }
+                var res = data[0].playlists_data
+                var imdbList=[]
+                for(i in res)
+                {
+                    imdbList.push(res[i].imdb_id)
+                }
+                $('#watchlisttitle').empty()
+                var title = params.get('name')
+                $('#watchlisttitle').append(title)
+                dwatchList(imdbList)    
+            })
+        })
+
+
+        function dwatchList(data)
+        {
+            $('#watchlistresult').empty()
+            for(i in data)
+            {
+                var url = `http://www.omdbapi.com/?apikey=aef7af3b&i=${data[i]}`
+                fetch(url)
+                .then(resp => resp.json())
+                .then(data => { 
+                        if(data.Poster == "N/A")
+                            var img=`<img src="{% static 'images/6.jpg' %}" class="card-img-top" alt="..." style="height:100%; width:100%; object-fit:cover;">`
+                        else
+                            var img =`<img src=${data.Poster} class="card-img-top" alt="..." style="height:100%; width:100%; object-fit:cover;">`
+                        
+                        var boxoffice=``
+                        if( data.BoxOffice != undefined)
+                        {
+                            boxoffice=`<div class="d-flex border-top border-light border-1 my-div">
+                                <span class="my-font">BoxOffice</span>
+                                <span class="my-color">${data.BoxOffice}</span>
+                            </div>`
+                        }
+                        var production=``
+                        if(data.Production != undefined)
+                        {
+                            production = `<div class="d-flex border-top border-light border-1 my-div">
+                                <span class="my-font">Production</span>
+                                <span class="my-color">${data.Production}</span>
+                            </div>`
+                        }
+                        var item = `
+                        <div class="row shadow " style="padding-bottom:30px">
+                            <div class="col-md-4" style="text-align:center;">
+                                ${img}
+                            </div>
+
+                            <div class="col-md-8"  style="background-color: rgb(26,26,26);">
+                                <div class="card-body">
+                                    
+                                    <div class="d-flex" style="justify-content: space-between;">
+                                        <div class="d-flex flex-column">
+                                            <h5 class="card-title" style="font-size:40px;">${data.Title}</h5>
+                                            <div class="d-flex" style="font-size:13px; gap:5px;">
+                                                <span style="color:darkgrey;">${data.Genre}</span>
+                                                <span style="color:darkgrey;">${data.Released}</span>
+                                                <span style="color:darkgrey;">${data.Rated}</span>
+                                                <span style="color:darkgrey;">${data.Runtime}</span>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="d-flex" style="gap:5px;">
+                                           
+                                            <div class="d-flex flex-column">
+                                                <span style="color:darkgrey; font-size:12px; font-weight:700; ">IMDB RATING</span>
+                                                <div class="d-flex">
+                                                    <i class="bi bi-star-fill" style="color:#f5c518; align-self:center; font-size:27px; padding:6px;"></i>
+                                                    <div class="d-flex flex-column">
+                                                        <span style="margin-left: 5px; color:white; font-size:22px;">${data.imdbRating}</span>
+                                                        <span style="font-size:13px; color:darkgrey;">${data.imdbVotes}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <div class="d-flex flex-column" style="margin-top:30px;">
+                                        
+                                        <span style="margin-bottom:10px;">${data.Plot}</span>
+                                        <div class="d-flex border-top border-light border-1 my-div" style="">
+                                            <span class="my-font" style="">Directors</span>
+                                            <span class="my-color" style="">${data.Director}</span>
+                                        </div>
+                                        <div class="d-flex border-top border-light border-1 my-div">
+                                            <span class="my-font">Writers</span>
+                                            <span class="my-color">${data.Writer}</span>
+                                        </div>
+                                        <div class="d-flex border-top border-light border-1 my-div">
+                                            <span class="my-font">Stars</span>
+                                            <span class="my-color">${data.Actors}</span>
+                                        </div>
+                                        <div class="d-flex border-top border-light border-1 my-div">
+                                            <span class="my-font">Language</span>
+                                            <span class="my-color">${data.Language}</span>
+                                        </div>
+                                        <div class="d-flex border-top border-light border-1 my-div">
+                                            <span class="my-font">Country</span>
+                                            <span class="my-color">${data.Country}</span>
+                                        </div>
+                                        <div class="d-flex border-top border-light border-1 my-div">
+                                            <span class="my-font">Awards</span>
+                                            <span class="my-color">${data.Awards}</span>
+                                        </div>
+                                        ${boxoffice}
+                                        ${production}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        `
+                        $('#watchlistresult').append(item);
+                
+                })
+
+            }
+        }
+            
+    </script>
+    
+{% endblock %}
+
