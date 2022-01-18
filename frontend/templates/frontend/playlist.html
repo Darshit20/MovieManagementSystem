@@ -33,6 +33,10 @@
 {% block js %}
     <script>
         const params = new URLSearchParams(window.location.search)
+        if(params.get('id') == null)
+        {
+            window.location.href = '/'
+        }
         $(document).ready(function(){
             var url=`api/v1/movie/get_user_playlist/${params.get('id')}`
            
