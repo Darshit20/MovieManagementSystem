@@ -64,7 +64,7 @@
             $('#watchlistresult').empty()
             for(i in data)
             {
-                var url = `http://www.omdbapi.com/?apikey=aef7af3b&i=${data[i]}`
+                var url = `https://www.omdbapi.com/?apikey=aef7af3b&i=${data[i]}`
                 fetch(url)
                 .then(resp => resp.json())
                 .then(data => { 

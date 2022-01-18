@@ -60,7 +60,7 @@
         $("#btnsearch").click(
             ()=>{
                 const searchValue = $("#btnsearchinput").val();
-                var url = `http://www.omdbapi.com/?apikey=aef7af3b&s=${searchValue}`
+                var url = `https://www.omdbapi.com/?apikey=aef7af3b&s=${searchValue}`
 
                 fetch(url)
                 .then(resp => resp.json())
@@ -70,7 +70,7 @@
                     
                     for(i in list)
                     {
-                        var url2 = `http://www.omdbapi.com/?apikey=aef7af3b&i=${list[i].imdbID}`
+                        var url2 = `https://www.omdbapi.com/?apikey=aef7af3b&i=${list[i].imdbID}`
                         fetch(url2)
                         .then(resp=>resp.json())
                         .then(data=>{
