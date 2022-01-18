@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import sys
 import environ
 import os
 import datetime
@@ -40,10 +41,12 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
+if (len(sys.argv) >= 2 and sys.argv[1] == 'runserver'):
+    DEBUG = True
+else:
+    DEBUG = False
+ALLOWED_HOSTS = ['moviesearchmanage.herokuapp.com', '127.0.0.1']
 
-# ALLOWED_HOSTS = ['moviesearchmanage.herokuapp.com', '127.0.0.1']
-ALLOWED_HOSTS = ["*"]
 
 # Application definition
 
