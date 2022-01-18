@@ -26,7 +26,7 @@
         </div>
     </div>
     <div class="row row-cols-1 row-cols-md-1 g-4;" style="padding:3em;" id="watchlistresult">
-       
+        <h1 style="color: #645e5e;">No movies in list..</h1>
     </div>
 {% endblock %}
     
@@ -46,15 +46,20 @@
                     window.location.href = '/signin'
                 }
                 var res = data[0].playlists_data
-                var imdbList=[]
-                for(i in res)
+                if(res.length != 0)
                 {
-                    imdbList.push(res[i].imdb_id)
+                    var imdbList=[]
+                    for(i in res)
+                    {
+                        imdbList.push(res[i].imdb_id)
+                    }
+                  
+                    dwatchList(imdbList)    
                 }
                 $('#watchlisttitle').empty()
                 var title = params.get('name')
                 $('#watchlisttitle').append(title)
-                dwatchList(imdbList)    
+              
             })
         })
 
